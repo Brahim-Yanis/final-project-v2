@@ -85,6 +85,85 @@ function hideGameModal() {
     if (modal) modal.classList.remove('active');
 }
 
+// ============================================
+// Toast Notifications
+// ============================================
+function showToast(options) {
+    const { type = 'info', icon, title, message, duration = 3000 } = options;
+    
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const defaultIcons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    
+    toast.innerHTML = `
+        <span class="toast-icon">${icon || defaultIcons[type]}</span>
+        <div class="toast-content">
+            <div class="toast-title">${title || ''}</div>
+            <div class="toast-message">${message || ''}</div>
+        </div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Remove after duration
+    setTimeout(() => {
+        toast.remove();
+    }, duration);
+}
+
+// ============================================
+// Confirmation Modal
+// ============================================
+function showConfirmModal(options) {
+    const { icon, title, message, onConfirm, onCancel } = options;
+    
+    const modal = document.getElementById('confirmModal');
+    const confirmIcon = document.getElementById('confirmIcon');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const yesBtn = document.getElementById('confirmYes');
+    const noBtn = document.getElementById('confirmNo');
+    
+    if (!modal) return;
+    
+    // Set content
+    if (confirmIcon) confirmIcon.textContent = icon || '⚠️';
+    if (confirmTitle) confirmTitle.textContent = title || 'Confirm';
+    if (confirmMessage) confirmMessage.textContent = message || 'Are you sure?';
+    
+    // Replace buttons to remove old listeners
+    const newYesBtn = yesBtn.cloneNode(true);
+    const newNoBtn = noBtn.cloneNode(true);
+    yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+    noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+    
+    newYesBtn.addEventListener('click', () => {
+        hideConfirmModal();
+        if (onConfirm) onConfirm();
+    });
+    
+    newNoBtn.addEventListener('click', () => {
+        hideConfirmModal();
+        if (onCancel) onCancel();
+    });
+    
+    modal.classList.add('active');
+}
+
+function hideConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    if (modal) modal.classList.remove('active');
+}
+
 
 // ============================================
 // Theme Management
@@ -165,6 +244,23 @@ function switchGame(gameId) {
 
     // Activate and re-initialize new game
     activateGame(gameId);
+
+    // Show toast for game switch
+    const gameNames = {
+        tictactoe: { name: 'Tic-Tac-Toe', icon: '⭕' },
+        quiz: { name: 'Quiz', icon: '❓' },
+        memory: { name: 'Memory Game', icon: '🃏' }
+    };
+    const gameInfo = gameNames[gameId];
+    if (gameInfo) {
+        showToast({
+            type: 'info',
+            icon: gameInfo.icon,
+            title: gameInfo.name,
+            message: 'Game loaded. Have fun!',
+            duration: 2000
+        });
+    }
 }
 
 function activateGame(gameId) {
@@ -355,7 +451,21 @@ function TicTacToeGame() {
             const restartHandler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                restartFromZero();
+                showConfirmModal({
+                    icon: '🔄',
+                    title: 'Reset All Scores?',
+                    message: 'This will reset all player scores to zero. Are you sure?',
+                    onConfirm: () => {
+                        restartFromZero();
+                        showToast({
+                            type: 'info',
+                            icon: '🔄',
+                            title: 'Scores Reset',
+                            message: 'All scores have been reset to zero.',
+                            duration: 2000
+                        });
+                    }
+                });
             };
             restartZeroBtn.removeEventListener('click', restartHandler);
             restartZeroBtn.addEventListener('click', restartHandler);
@@ -662,6 +772,15 @@ function QuizGame() {
         if (categoryScreen) categoryScreen.classList.add('hidden');
         if (questionScreen) questionScreen.classList.remove('hidden');
 
+        // Show toast for starting quiz
+        showToast({
+            type: 'info',
+            icon: category.icon || '📚',
+            title: `${category.name} Quiz`,
+            message: `${state.questions.length} questions. Good luck!`,
+            duration: 2500
+        });
+
         displayQuestion();
     }
 
@@ -786,8 +905,22 @@ function QuizGame() {
             if (index === question.correct) {
                 state.score++;
                 playSound('winSound');
+                showToast({
+                    type: 'success',
+                    icon: '🎉',
+                    title: 'Correct!',
+                    message: 'Great job! You got it right!',
+                    duration: 2000
+                });
             } else {
                 playSound('moveSound');
+                showToast({
+                    type: 'error',
+                    icon: '😔',
+                    title: 'Wrong Answer',
+                    message: `The correct answer was: ${question.options[question.correct]}`,
+                    duration: 3000
+                });
             }
         } else {
             // Timeout - show correct answer
@@ -798,6 +931,13 @@ function QuizGame() {
                 }
             });
             playSound('moveSound');
+            showToast({
+                type: 'warning',
+                icon: '⏰',
+                title: "Time's Up!",
+                message: `The correct answer was: ${question.options[question.correct]}`,
+                duration: 3000
+            });
         }
 
         updateScoreDisplay();
@@ -942,7 +1082,16 @@ function QuizGame() {
             const handler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                restartQuiz();
+                if (state.currentQuestionIndex > 0) {
+                    showConfirmModal({
+                        icon: '🔙',
+                        title: 'Back to Categories?',
+                        message: 'Your quiz progress will be lost. Continue?',
+                        onConfirm: () => restartQuiz()
+                    });
+                } else {
+                    restartQuiz();
+                }
             };
             restartBtn.addEventListener('click', handler);
             state.eventListeners.push({ element: restartBtn, event: 'click', handler });
@@ -962,7 +1111,21 @@ function QuizGame() {
             const handler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                restartQuizFromZero();
+                showConfirmModal({
+                    icon: '🔄',
+                    title: 'Reset Quiz?',
+                    message: 'This will reset your quiz and return to category selection. Continue?',
+                    onConfirm: () => {
+                        restartQuizFromZero();
+                        showToast({
+                            type: 'info',
+                            icon: '🔄',
+                            title: 'Quiz Reset',
+                            message: 'Quiz has been reset.',
+                            duration: 2000
+                        });
+                    }
+                });
             };
             restartZeroBtn.addEventListener('click', handler);
             state.eventListeners.push({ element: restartZeroBtn, event: 'click', handler });
@@ -1087,6 +1250,17 @@ function MemoryGame() {
         setGridLocked(false);
         updateCounters();
         startTimer();
+
+        // Show toast for starting game
+        const difficultyNames = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+        const difficultyIcons = { easy: '🌱', medium: '🌳', hard: '🌲' };
+        showToast({
+            type: 'info',
+            icon: difficultyIcons[difficulty] || '🎮',
+            title: `${difficultyNames[difficulty]} Mode`,
+            message: `${config.cardCount} cards, ${config.timeLimit}s to match them all!`,
+            duration: 2500
+        });
     }
 
     function startTimer() {
@@ -1441,7 +1615,16 @@ function MemoryGame() {
             const handler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                resetGame();
+                if (state.gameActive && state.matched.length > 0) {
+                    showConfirmModal({
+                        icon: '🔄',
+                        title: 'Change Difficulty?',
+                        message: 'Your current progress will be lost. Continue?',
+                        onConfirm: () => resetGame()
+                    });
+                } else {
+                    resetGame();
+                }
             };
             resetBtn.addEventListener('click', handler);
             state.eventListeners.push({ element: resetBtn, event: 'click', handler });
@@ -1451,8 +1634,20 @@ function MemoryGame() {
             const handler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                stopTimer();
-                switchGame('tictactoe');
+                if (state.gameActive && state.matched.length > 0) {
+                    showConfirmModal({
+                        icon: '🏠',
+                        title: 'Return to Main Menu?',
+                        message: 'Your current game progress will be lost. Continue?',
+                        onConfirm: () => {
+                            stopTimer();
+                            switchGame('tictactoe');
+                        }
+                    });
+                } else {
+                    stopTimer();
+                    switchGame('tictactoe');
+                }
             };
             mainMenuBtn.addEventListener('click', handler);
             state.eventListeners.push({ element: mainMenuBtn, event: 'click', handler });
@@ -1462,7 +1657,21 @@ function MemoryGame() {
             const handler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                restartMemoryFromZero();
+                showConfirmModal({
+                    icon: '🔄',
+                    title: 'Reset Game?',
+                    message: 'This will reset all your progress. Are you sure?',
+                    onConfirm: () => {
+                        restartMemoryFromZero();
+                        showToast({
+                            type: 'info',
+                            icon: '🔄',
+                            title: 'Game Reset',
+                            message: 'Memory game has been reset.',
+                            duration: 2000
+                        });
+                    }
+                });
             };
             restartZeroBtn.addEventListener('click', handler);
             state.eventListeners.push({ element: restartZeroBtn, event: 'click', handler });

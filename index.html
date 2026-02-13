@@ -221,6 +221,22 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-container confirm-modal">
+            <div class="modal-icon" id="confirmIcon">⚠️</div>
+            <h2 class="modal-title" id="confirmTitle">Confirm Action</h2>
+            <p class="modal-message" id="confirmMessage">Are you sure?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-danger" id="confirmYes">Yes</button>
+                <button class="modal-btn modal-btn-secondary" id="confirmNo">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Sound Effects (Data URIs for minimal dependencies) -->
     <audio id="moveSound" preload="auto">
         <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
