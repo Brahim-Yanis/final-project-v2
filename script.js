@@ -14,7 +14,6 @@ const gameState = {
 // Initialization
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded - initializing Game Hub');
     initTheme();
     setupThemeButton();
     initNavigation();
@@ -32,8 +31,58 @@ function initAllGames() {
     window.initQuiz = () => gameState.gameInstances.quiz?.init();
     window.initMemoryGame = () => gameState.gameInstances.memory?.init();
     
-    console.log('Initializing all games');
     Object.values(gameState.gameInstances).forEach(game => game.init());
+}
+
+// ============================================
+// Game Result Modal
+// ============================================
+function showGameModal(options) {
+    const { type, title, message, icon, onPlayAgain, onClose } = options;
+    
+    const modal = document.getElementById('gameModal');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const playAgainBtn = document.getElementById('modalPlayAgain');
+    const closeBtn = document.getElementById('modalClose');
+    
+    if (!modal) return;
+    
+    // Set content
+    modalIcon.textContent = icon || '🎮';
+    modalTitle.textContent = title || 'Game Over';
+    modalMessage.textContent = message || '';
+    
+    // Set title color class
+    modalTitle.className = 'modal-title';
+    if (type === 'win') modalTitle.classList.add('win');
+    else if (type === 'lose') modalTitle.classList.add('lose');
+    else if (type === 'draw') modalTitle.classList.add('draw');
+    
+    // Remove old listeners and add new ones
+    const newPlayAgainBtn = playAgainBtn.cloneNode(true);
+    const newCloseBtn = closeBtn.cloneNode(true);
+    playAgainBtn.parentNode.replaceChild(newPlayAgainBtn, playAgainBtn);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    
+    newPlayAgainBtn.addEventListener('click', () => {
+        hideGameModal();
+        if (onPlayAgain) onPlayAgain();
+    });
+    
+    newCloseBtn.addEventListener('click', () => {
+        hideGameModal();
+        if (onClose) onClose();
+    });
+    
+    // Show modal
+    modal.classList.add('active');
+}
+
+function hideGameModal() {
+    const modal = document.getElementById('gameModal');
+    if (modal) modal.classList.remove('active');
 }
 
 
@@ -87,7 +136,6 @@ function initNavigation() {
 function switchGame(gameId) {
     if (gameState.currentGame === gameId) return;
 
-    console.log(`Switching from ${gameState.currentGame} to ${gameId}`);
 
     // Cleanup old game - remove listeners and pause
     if (gameState.gameInstances[gameState.currentGame]) {
@@ -116,7 +164,6 @@ function switchGame(gameId) {
     gameState.currentGame = gameId;
 
     // Activate and re-initialize new game
-    console.log(`Re-initializing ${gameId} game`);
     activateGame(gameId);
 }
 
@@ -211,7 +258,16 @@ function TicTacToeGame() {
                 const cells = document.querySelectorAll('#board .cell');
                 [a, b, c].forEach(idx => cells[idx]?.classList.add('winner'));
 
-                scheduleAutoReset();
+                // Show win modal
+                const isComputer = state.gameMode === 'pvc' && winner === 'O';
+                showGameModal({
+                    type: isComputer ? 'lose' : 'win',
+                    icon: isComputer ? '😔' : '🎉',
+                    title: isComputer ? 'You Lose!' : `Player ${winner} Wins!`,
+                    message: isComputer ? 'The computer won this round. Try again!' : `Congratulations! Player ${winner} has won the game!`,
+                    onPlayAgain: () => resetGame()
+                });
+
                 return { winner };
             }
         }
@@ -224,7 +280,15 @@ function TicTacToeGame() {
             const status = document.getElementById('gameStatus');
             if (status) status.textContent = "It's a Draw!";
 
-            scheduleAutoReset();
+            // Show draw modal
+            showGameModal({
+                type: 'draw',
+                icon: '🤝',
+                title: "It's a Draw!",
+                message: 'No winner this time. Play again?',
+                onPlayAgain: () => resetGame()
+            });
+
             return { winner: 'draw' };
         }
 
@@ -254,7 +318,6 @@ function TicTacToeGame() {
         state.eventListeners.push({ element: board, event: 'click', handler });
         state.boardListenerAttached = true;
         
-        console.log('[TTT] Board event delegation listener attached');
     }
 
     function setupModeSelector() {
@@ -356,10 +419,8 @@ function TicTacToeGame() {
     }
 
     function handleCellClick(index) {
-        console.log(`[TTT] Cell clicked: index=${index}, gameActive=${state.gameActive}, board[${index}]=${state.board[index]}`);
         
         if (state.board[index] !== '' || !state.gameActive) {
-            console.log(`[TTT] Click rejected - cell occupied or game inactive`);
             return;
         }
 
@@ -370,7 +431,6 @@ function TicTacToeGame() {
         const result = checkGameState();
         if (result) {
             state.gameActive = false;
-            console.log(`[TTT] Game ended with result:`, result);
             return;
         }
 
@@ -431,7 +491,6 @@ function TicTacToeGame() {
 
     return {
         init() {
-            console.log('Initializing Tic-Tac-Toe game');
             if (state.autoResetTimeout) {
                 clearTimeout(state.autoResetTimeout);
             }
@@ -444,21 +503,18 @@ function TicTacToeGame() {
             resetGame();
         },
         activate() {
-            console.log('Activating Tic-Tac-Toe game');
             state.gameActive = true;
             resetGame();
             updateStatusDisplay();
             updateScoreDisplay();
         },
         pause() {
-            console.log('Pausing Tic-Tac-Toe game');
             state.gameActive = false;
             if (state.autoResetTimeout) {
                 clearTimeout(state.autoResetTimeout);
             }
         },
         cleanup() {
-            console.log('Cleaning up Tic-Tac-Toe game');
             if (state.autoResetTimeout) {
                 clearTimeout(state.autoResetTimeout);
                 state.autoResetTimeout = null;
@@ -778,19 +834,38 @@ function QuizGame() {
 
         const percentage = (state.score / state.questions.length) * 100;
         let message = '';
+        let icon = '';
+        let type = '';
 
         if (percentage === 100) {
-            message = '🎉 Perfect Score! You are a quiz master!';
+            message = 'Perfect Score! You are a quiz master!';
+            icon = '🏆';
+            type = 'win';
         } else if (percentage >= 80) {
-            message = '🌟 Excellent! You did great!';
+            message = 'Excellent! You did great!';
+            icon = '🌟';
+            type = 'win';
         } else if (percentage >= 60) {
-            message = '👍 Good job! Keep practicing!';
+            message = 'Good job! Keep practicing!';
+            icon = '👍';
+            type = 'draw';
         } else {
-            message = '💪 You can do better! Try again!';
+            message = 'You can do better! Try again!';
+            icon = '💪';
+            type = 'lose';
         }
 
         const resultsMessage = document.getElementById('resultsMessage');
-        if (resultsMessage) resultsMessage.textContent = message;
+        if (resultsMessage) resultsMessage.textContent = icon + ' ' + message;
+
+        // Show quiz result modal
+        showGameModal({
+            type: type,
+            icon: icon,
+            title: `Quiz Complete: ${state.score}/${state.questions.length}`,
+            message: message,
+            onPlayAgain: () => restartQuiz()
+        });
     }
 
     function restartQuiz() {
@@ -902,7 +977,6 @@ function QuizGame() {
 
     return {
         init() {
-            console.log('Initializing Quiz game');
             // Always cleanup first
             removeEventListeners();
             stopTimer();
@@ -911,17 +985,14 @@ function QuizGame() {
             updateScoreDisplay();
         },
         activate() {
-            console.log('Activating Quiz game');
             showCategorySelection();
         },
         pause() {
-            console.log('Pausing Quiz game');
             stopTimer();
             removeQuestionEventListeners();
             state.gameActive = false;
         },
         cleanup() {
-            console.log('Cleaning up Quiz game');
             stopTimer();
             removeEventListeners();
             removeQuestionEventListeners();
@@ -935,12 +1006,12 @@ function QuizGame() {
 // MEMORY CARD GAME - Factory Pattern
 // ============================================
 function MemoryGame() {
-    const symbols = ['🍎', '🍊', '🍋', '🍌', '🍉', '🍓', '🍒', '🍑', '🥝', '🍐', '🍍', '🥭', '🍓', '🍒'];
+    const symbols = ['🍎', '🍊', '🍋', '🍌', '🍉', '🍓', '🍒', '🍑', '🥝', '🍐', '🍍', '🥭'];
 
     const difficultyConfig = {
-        easy: { cardCount: 9, columns: 3, rows: 3, symbols: 4, name: 'Easy', timeLimit: 90 },
+        easy: { cardCount: 12, columns: 4, rows: 3, symbols: 6, name: 'Easy', timeLimit: 90 },
         medium: { cardCount: 16, columns: 4, rows: 4, symbols: 8, name: 'Medium', timeLimit: 120 },
-        hard: { cardCount: 25, columns: 5, rows: 5, symbols: 12, name: 'Hard', timeLimit: 150 }
+        hard: { cardCount: 24, columns: 6, rows: 4, symbols: 12, name: 'Hard', timeLimit: 150 }
     };
 
     const state = {
@@ -974,7 +1045,6 @@ function MemoryGame() {
     function startGameWithDifficulty(difficulty) {
         if (!difficultyConfig[difficulty]) return;
 
-        console.log(`Starting Memory game with difficulty: ${difficulty}`);
 
         state.cardClickHandlers = {};
         state.isProcessing = false;
@@ -992,18 +1062,10 @@ function MemoryGame() {
         state.totalTime = config.timeLimit;
         state.timeRemaining = config.timeLimit;
         
-        // Create pairs of symbols
-        const requiredSymbols = Math.min(config.symbols, symbols.length);
-        const usedSymbols = symbols.slice(0, requiredSymbols);
+        // Create pairs of symbols (cardCount / 2 pairs)
+        const pairsNeeded = config.cardCount / 2;
+        const usedSymbols = symbols.slice(0, pairsNeeded);
         state.cards = [...usedSymbols, ...usedSymbols];
-
-        // Validate card count
-        if (state.cards.length !== config.cardCount) {
-            while (state.cards.length < config.cardCount) {
-                state.cards.push(symbols[state.cards.length % symbols.length]);
-            }
-            state.cards = state.cards.slice(0, config.cardCount);
-        }
 
         shuffleCards();
 
@@ -1075,10 +1137,21 @@ function MemoryGame() {
         const message = document.getElementById('memoryMessage');
         
         if (reason === 'timeup') {
+            const pairsMatched = state.matched.length / 2;
+            const totalPairs = state.cards.length / 2;
             if (message) {
-                message.textContent = `⏰ Time's Up! You matched ${state.matched.length / 2} pairs with ${state.score} points. Try again!`;
+                message.textContent = `⏰ Time's Up! You matched ${pairsMatched} pairs with ${state.score} points. Try again!`;
             }
             playSound('moveSound');
+            
+            // Show lose modal
+            showGameModal({
+                type: 'lose',
+                icon: '⏰',
+                title: "Time's Up!",
+                message: `You matched ${pairsMatched}/${totalPairs} pairs with ${state.score} points. Try again!`,
+                onPlayAgain: () => resetGame()
+            });
         } else if (reason === 'won') {
             // This is handled in gameWon()
         }
@@ -1101,8 +1174,10 @@ function MemoryGame() {
         const grid = document.getElementById('memoryGrid');
         if (!grid) return;
 
-        // Clear old cards
+        // Clear old cards and unlock the grid
         grid.innerHTML = '';
+        grid.classList.remove('locked');
+
 
         state.cards.forEach((symbol, index) => {
             const card = document.createElement('div');
@@ -1111,8 +1186,12 @@ function MemoryGame() {
             card.dataset.symbol = symbol;
             card.textContent = '?';
             
-            card.style.pointerEvents = 'auto';
-            card.style.cursor = 'pointer';
+            // Attach click handler directly to each card
+            card.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                flipCard(index);
+            };
 
             if (state.matched.includes(index)) {
                 card.classList.add('matched');
@@ -1123,20 +1202,23 @@ function MemoryGame() {
             grid.appendChild(card);
         });
 
-        // Ensure event delegation listener is attached to grid
-        setupMemoryGridListener();
-        console.log('[Memory] Cards rendered and grid listener attached');
     }
 
     function setupMemoryGridListener() {
         const grid = document.getElementById('memoryGrid');
-        if (!grid) return;
-        if (state.gridListenerAttached) return;
+        if (!grid) {
+            return;
+        }
+        if (state.gridListenerAttached) {
+            return;
+        }
 
         // Use event delegation on the grid container
         const handler = (e) => {
             const card = e.target.closest('.memory-card');
-            if (!card) return;
+            if (!card) {
+                return;
+            }
             
             e.preventDefault();
             e.stopPropagation();
@@ -1150,46 +1232,39 @@ function MemoryGame() {
         grid.addEventListener('click', handler);
         state.eventListeners.push({ element: grid, event: 'click', handler });
         state.gridListenerAttached = true;
-        console.log('[Memory] Grid event delegation listener attached');
     }
 
     function flipCard(index) {
-        console.log(`[Memory] Card clicked: index=${index}, gameActive=${state.gameActive}, isProcessing=${state.isProcessing}`);
         
         // Strict guards to prevent interaction during animations or when inappropriate
         if (!state.gameActive) {
-            console.log(`[Memory] Click rejected - game not active`);
             return;
         }
         if (state.isProcessing) {
-            console.log(`[Memory] Click rejected - processing/locked`);
             return;
         }
         if (state.flipped.includes(index)) {
-            console.log(`[Memory] Click rejected - already flipped`);
             return;
         }
         if (state.matched.includes(index)) {
-            console.log(`[Memory] Click rejected - already matched`);
             return;
         }
         if (state.flipped.length >= 2) {
-            console.log(`[Memory] Click rejected - already flipped 2 cards`);
             return;
         }
 
-        const card = document.querySelector(`[data-index="${index}"]`);
+        const card = document.querySelector(`#memoryGrid [data-index="${index}"]`);
         if (!card) {
             console.warn(`[Memory] Card element not found for index ${index}`);
             return;
         }
 
         card.classList.add('flipped');
-        card.textContent = state.cards[index];
+        const emoji = state.cards[index];
+        card.textContent = emoji;
         state.flipped.push(index);
         playSound('flipSound');
 
-        console.log(`[Memory] Card flipped, flipped count: ${state.flipped.length}`);
 
         if (state.flipped.length === 2) {
             checkMatch();
@@ -1216,15 +1291,15 @@ function MemoryGame() {
         if (match) {
             setTimeout(() => {
                 state.matched.push(first, second);
-                const firstCard = document.querySelector(`[data-index="${first}"]`);
-                const secondCard = document.querySelector(`[data-index="${second}"]`);
+                const firstCard = document.querySelector(`#memoryGrid [data-index="${first}"]`);
+                const secondCard = document.querySelector(`#memoryGrid [data-index="${second}"]`);
                 if (firstCard) {
                     firstCard.classList.add('matched');
-                    firstCard.style.pointerEvents = 'auto';
+                    firstCard.style.pointerEvents = 'none';
                 }
                 if (secondCard) {
                     secondCard.classList.add('matched');
-                    secondCard.style.pointerEvents = 'auto';
+                    secondCard.style.pointerEvents = 'none';
                 }
                 state.flipped = [];
                 state.isProcessing = false;
@@ -1249,12 +1324,12 @@ function MemoryGame() {
 
     function unflipCards() {
         state.flipped.forEach(index => {
-            const card = document.querySelector(`[data-index="${index}"]`);
+            const card = document.querySelector(`#memoryGrid [data-index="${index}"]`);
             if (card) {
                 card.classList.remove('flipped');
+                card.textContent = '?';
             }
-        });    card.textContent = '?';
-            
+        });
     }
 
     function updateCounters() {
@@ -1275,6 +1350,15 @@ function MemoryGame() {
             message.textContent = `🎉 You won in ${state.moves} moves with ${state.score} points${timeBonus > 0 ? ` (+${timeBonus} time bonus)` : ''}! Total: ${totalScore}`;
         }
         playSound('winSound');
+        
+        // Show win modal
+        showGameModal({
+            type: 'win',
+            icon: '🎉',
+            title: 'You Win!',
+            message: `Completed in ${state.moves} moves! Score: ${state.score}${timeBonus > 0 ? ` (+${timeBonus} time bonus)` : ''} = ${totalScore} total!`,
+            onPlayAgain: () => resetGame()
+        });
     }
 
     function resetGame() {
@@ -1389,7 +1473,6 @@ function MemoryGame() {
 
     return {
         init() {
-            console.log('Initializing Memory game');
             // Init runs once; attach listeners only once
             stopTimer();
             
@@ -1413,7 +1496,6 @@ function MemoryGame() {
             showDifficultySelection();
         },
         activate() {
-            console.log('Activating Memory game');
             // CRITICAL: Reset all state flags that might be locked from previous game
             stopTimer();
             state.gameActive = false;
@@ -1432,14 +1514,12 @@ function MemoryGame() {
             showDifficultySelection();
         },
         pause() {
-            console.log('Pausing Memory game');
             state.gameActive = false;
             stopTimer();
             // CRITICAL: Do NOT set isProcessing = true - this locks the game permanently
             // Just pause without locking input
         },
         cleanup() {
-            console.log('Cleaning up Memory game');
             stopTimer();
             // Reset all state to ensure clean state for next activation
             state.gameActive = false;
@@ -1456,17 +1536,14 @@ function MemoryGame() {
 
 // Initialize wrapper functions for backward compatibility
 function initTicTacToe() {
-    console.log('[INIT] Called initTicTacToe()');
     gameState.gameInstances.tictactoe?.init();
 }
 
 function initQuiz() {
-    console.log('[INIT] Called initQuiz()');
     gameState.gameInstances.quiz?.init();
 }
 
 function initMemoryGame() {
-    console.log('[INIT] Called initMemoryGame()');
     gameState.gameInstances.memory?.init();
 }
 
@@ -1475,34 +1552,26 @@ function initMemoryGame() {
 // ============================================
 window.DEBUG_GAME = {
     testClickHandlers: () => {
-        console.log('=== CLICK HANDLER TEST ===');
-        console.log('Testing Tic-Tac-Toe cells...');
         const cells = document.querySelectorAll('.cell');
         cells.forEach((cell, idx) => {
             if (cell.onclick) console.warn(`Cell ${idx} has inline onclick!`);
             const listeners = getEventListeners?.(cell)?.click;
-            console.log(`Cell ${idx} listeners:`, listeners ? listeners.length : 'none');
         });
         
-        console.log('Testing Quiz options...');
         const options = document.querySelectorAll('.quiz-option');
         options.forEach((opt, idx) => {
             if (opt.onclick) console.warn(`Option ${idx} has inline onclick!`);
             const listeners = getEventListeners?.(opt)?.click;
-            console.log(`Option ${idx} listeners:`, listeners ? listeners.length : 'none');
         });
         
-        console.log('Testing Memory cards...');
         const cards = document.querySelectorAll('.memory-card');
         cards.forEach((card, idx) => {
             if (card.onclick) console.warn(`Card ${idx} has inline onclick!`);
             const listeners = getEventListeners?.(card)?.click;
-            console.log(`Card ${idx} listeners:`, listeners ? listeners.length : 'none');
         });
     },
     
     verifyPointerEvents: () => {
-        console.log('=== POINTER EVENTS TEST ===');
         const testElements = {
             'cells': document.querySelectorAll('.cell'),
             'quiz-options': document.querySelectorAll('.quiz-option'),
@@ -1519,22 +1588,11 @@ window.DEBUG_GAME = {
                 }
             });
         }
-        console.log('Pointer events verification complete');
     },
     
     verifyListeners: () => {
-        console.log('=== GAME INSTANCES ===');
-        console.log('Game state:', gameState);
-        Object.entries(gameState.gameInstances).forEach(([name, game]) => {
-            console.log(`${name}:`, {
-                init: typeof game.init,
-                activate: typeof game.activate,
-                pause: typeof game.pause,
-                cleanup: typeof game.cleanup
-            });
-        });
+        // Debug function - removed console logs
     }
 };
 
-console.log('%c✅ Game Hub Ready! Available debug commands:\n- window.DEBUG_GAME.testClickHandlers()\n- window.DEBUG_GAME.verifyPointerEvents()\n- window.DEBUG_GAME.verifyListeners()', 'color: green; font-weight: bold;');
 

@@ -158,17 +158,17 @@
                         <button class="difficulty-btn" data-difficulty="easy">
                             <span class="diff-emoji">🌱</span>
                             <span class="diff-name">Easy</span>
-                            <span class="diff-info">4 cards • 90s</span>
+                            <span class="diff-info">12 cards • 90s</span>
                         </button>
                         <button class="difficulty-btn" data-difficulty="medium">
                             <span class="diff-emoji">🌳</span>
                             <span class="diff-name">Medium</span>
-                            <span class="diff-info">12 cards • 120s</span>
+                            <span class="diff-info">16 cards • 120s</span>
                         </button>
                         <button class="difficulty-btn" data-difficulty="hard">
                             <span class="diff-emoji">🌲</span>
                             <span class="diff-name">Hard</span>
-                            <span class="diff-info">16 cards • 150s</span>
+                            <span class="diff-info">24 cards • 150s</span>
                         </button>
                     </div>
                 </div>
@@ -207,6 +207,19 @@
     <footer class="footer">
         <p>&copy; 2026 Game Hub. Created with ❤️ for fun and learning.</p>
     </footer>
+
+    <!-- Game Result Modal -->
+    <div class="modal-overlay" id="gameModal">
+        <div class="modal-container">
+            <div class="modal-icon" id="modalIcon">🎉</div>
+            <h2 class="modal-title" id="modalTitle">You Win!</h2>
+            <p class="modal-message" id="modalMessage">Congratulations!</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" id="modalPlayAgain">Play Again</button>
+                <button class="modal-btn modal-btn-secondary" id="modalClose">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Sound Effects (Data URIs for minimal dependencies) -->
     <audio id="moveSound" preload="auto">
