@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Hub - Play Now</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8E%AE%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">🎮 Game Hub</div>
+            <ul class="navbar-menu">
+                <li><a href="#" class="nav-link active" data-game="tictactoe">Tic-Tac-Toe</a></li>
+                <li><a href="#" class="nav-link" data-game="quiz">Quiz</a></li>
+                <li><a href="#" class="nav-link" data-game="memory">Memory</a></li>
+            </ul>
+            <div class="theme-toggle">
+                <button class="theme-btn" id="themeBtn" title="Toggle dark/light mode">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Tic-Tac-Toe Game -->
+        <section class="game-section active" id="tictactoe-game">
+            <div class="game-header">
+                <h1>Tic-Tac-Toe</h1>
+            </div>
+
+            <div class="tictactoe-container">
+                <div class="game-info">
+                    <div class="score-board">
+                        <div class="score-item">
+                            <span class="score-label">Player X</span>
+                            <span class="score-value" id="playerXScore">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">Draws</span>
+                            <span class="score-value" id="drawScore">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">Player O</span>
+                            <span class="score-value" id="playerOScore">0</span>
+                        </div>
+                    </div>
+
+                    <div class="mode-selector">
+                        <label>Game Mode:</label>
+                        <select id="gameMode">
+                            <option value="pvp">Player vs Player</option>
+                            <option value="pvc">Player vs Computer</option>
+                        </select>
+                    </div>
+
+                    <div class="status-display" id="gameStatus">Game Start - Player X's Turn</div>
+                </div>
+
+                <div class="board" id="board">
+                    <div class="cell" data-index="0"></div>
+                    <div class="cell" data-index="1"></div>
+                    <div class="cell" data-index="2"></div>
+                    <div class="cell" data-index="3"></div>
+                    <div class="cell" data-index="4"></div>
+                    <div class="cell" data-index="5"></div>
+                    <div class="cell" data-index="6"></div>
+                    <div class="cell" data-index="7"></div>
+                    <div class="cell" data-index="8"></div>
+                </div>
+
+                <button class="reset-btn" id="resetTicTacToe">Reset Game</button>
+            </div>
+        </section>
+
+        <!-- Quiz Game -->
+        <section class="game-section" id="quiz-game">
+            <div class="game-header">
+                <h1>Quiz Application</h1>
+            </div>
+
+            <div class="quiz-container">
+                <!-- Category Selection Screen -->
+                <div class="quiz-screen" id="quizCategoryScreen">
+                    <div class="category-selection">
+                        <h2>Select a Quiz Category</h2>
+                        <div class="category-buttons">
+                            <button class="category-btn" data-category="webdev">🌐 Web Development</button>
+                            <button class="category-btn" data-category="geography">🌍 Countries & Geography</button>
+                            <button class="category-btn" data-category="math">🔢 Mathematics</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Question Screen -->
+                <div class="quiz-screen hidden" id="quizQuestionScreen">
+                    <div class="quiz-header-bar">
+                        <div class="quiz-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="currentQuestion">1</span> / <span id="totalQuestions">5</span>
+                            </div>
+                        </div>
+                        <div class="quiz-timer-score">
+                            <div class="timer-display" id="timerDisplay">
+                                <span class="timer-icon">⏱️</span>
+                                <span class="timer-value" id="timerValue">30</span>s
+                            </div>
+                            <div class="current-score-display" id="scoreDisplay">
+                                <span class="score-icon">⭐</span>
+                                <span class="score-value" id="currentScoreValue">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="questionDisplay"></div>
+
+                    <div class="quiz-options" id="optionsContainer"></div>
+
+                    <div class="quiz-controls">
+                        <button class="btn btn-next" id="nextBtn" disabled>Next Question</button>
+                        <button class="btn btn-restart" id="quizRestart">Back to Categories</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results Screen -->
+                <div class="quiz-screen hidden" id="quizResultsScreen">
+                    <div class="results-container">
+                        <h2>Quiz Complete!</h2>
+                        <div class="score-circle">
+                            <div class="score-text">
+                                <span class="score-number" id="finalScore">0</span>
+                                <span class="score-total">/ 5</span>
+                            </div>
+                        </div>
+                        <div class="results-message" id="resultsMessage"></div>
+                        <button class="btn btn-restart" id="restartFromResults">Try Another Category</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Memory Game -->
+        <section class="game-section" id="memory-game">
+            <div class="game-header">
+                <h1>Memory Card Game</h1>
+            </div>
+
+            <div class="memory-container">
+                <!-- Difficulty Selection Screen -->
+                <div class="difficulty-selection" id="difficultySelection">
+                    <h3 class="difficulty-title">Choose Your Difficulty:</h3>
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn" data-difficulty="easy">
+                            <span class="diff-emoji">🌱</span>
+                            <span class="diff-name">Easy</span>
+                            <span class="diff-info">4 cards • 90s</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="medium">
+                            <span class="diff-emoji">🌳</span>
+                            <span class="diff-name">Medium</span>
+                            <span class="diff-info">12 cards • 120s</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="hard">
+                            <span class="diff-emoji">🌲</span>
+                            <span class="diff-name">Hard</span>
+                            <span class="diff-info">16 cards • 150s</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Memory Game Screen -->
+                <div class="memory-game-screen hidden" id="memoryGameScreen">
+                    <div class="memory-stats">
+                        <div class="stat">
+                            <span class="stat-label">Moves</span>
+                            <span class="stat-value" id="moveCounter">0</span>
+                        </div>
+                        <div class="stat timer-stat">
+                            <span class="stat-label">Time Left</span>
+                            <span class="stat-value timer-value" id="timerCounter">90</span>s
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Score</span>
+                            <span class="stat-value" id="memoryScore">0</span>
+                        </div>
+                    </div>
+
+                    <div class="memory-grid" id="memoryGrid"></div>
+
+                    <div class="memory-controls">
+                        <button class="reset-btn" id="resetMemory">Change Difficulty</button>
+                        <button class="reset-btn" id="memoryMainMenu">Main Menu</button>
+                    </div>
+
+                    <div class="memory-message" id="memoryMessage"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Game Hub. Created with ❤️ for fun and learning.</p>
+    </footer>
+
+    <!-- Sound Effects (Data URIs for minimal dependencies) -->
+    <audio id="moveSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
+    </audio>
+    <audio id="winSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
+    </audio>
+    <audio id="flipSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
