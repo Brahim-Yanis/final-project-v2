@@ -16,6 +16,7 @@
                 <li><a href="#" class="nav-link active" data-game="tictactoe">Tic-Tac-Toe</a></li>
                 <li><a href="#" class="nav-link" data-game="quiz">Quiz</a></li>
                 <li><a href="#" class="nav-link" data-game="memory">Memory</a></li>
+                <li><a href="#" class="nav-link" data-game="snake">Snake</a></li>
             </ul>
             <div class="theme-toggle">
                 <button class="theme-btn" id="themeBtn" title="Toggle dark/light mode">🌙</button>
@@ -198,6 +199,61 @@
                     </div>
 
                     <div class="memory-message" id="memoryMessage"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Snake Game -->
+        <section class="game-section" id="snake-game">
+            <div class="game-header">
+                <h1>Snake Game</h1>
+            </div>
+
+            <div class="snake-container">
+                <div class="snake-stats">
+                    <div class="stat">
+                        <span class="stat-label">Score</span>
+                        <span class="stat-value" id="snakeScore">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">High Score</span>
+                        <span class="stat-value" id="snakeHighScore">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Speed</span>
+                        <span class="stat-value" id="snakeSpeed">1</span>
+                    </div>
+                </div>
+
+                <div class="snake-game-wrapper">
+                    <canvas id="snakeCanvas" width="400" height="400"></canvas>
+                    <div class="snake-overlay hidden" id="snakeOverlay">
+                        <div class="snake-overlay-content">
+                            <h2 id="snakeOverlayTitle">Snake Game</h2>
+                            <p id="snakeOverlayMessage">Press Start or Space to play</p>
+                            <button class="snake-start-btn" id="snakeStartBtn">Start Game</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="snake-controls">
+                    <button class="reset-btn" id="snakePauseBtn">Pause</button>
+                    <button class="reset-btn" id="snakeResetBtn">Reset</button>
+                </div>
+
+                <div class="snake-instructions">
+                    <p>🎮 Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move</p>
+                    <p>📱 On mobile, use the on-screen controls</p>
+                </div>
+
+                <!-- Mobile Controls -->
+                <div class="snake-mobile-controls" id="snakeMobileControls">
+                    <button class="mobile-btn" data-direction="up">▲</button>
+                    <div class="mobile-btn-row">
+                        <button class="mobile-btn" data-direction="left">◄</button>
+                        <button class="mobile-btn" data-direction="down">▼</button>
+                        <button class="mobile-btn" data-direction="right">►</button>
+                    </div>
                 </div>
             </div>
         </section>
