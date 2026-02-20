@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game - Game Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-logo">🎮 Game Hub</div>
+        <ul class="nav-links">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../tictactoe/index.html">Tic Tac Toe</a></li>
+            <li><a href="../quiz/index.html">Quiz</a></li>
+            <li><a href="../memory/index.html">Memory</a></li>
+            <li><a href="../snake/index.html" class="active">Snake</a></li>
+            <li><a href="../maze/index.html">Maze</a></li>
+        </ul>
+        <button id="themeBtn" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+    </nav>
+
+    <!-- Main Game Content -->
+    <main class="main-content">
+        <section class="game-section active" id="snake-game">
+            <div class="game-header">
+                <h1>Snake Game</h1>
+            </div>
+
+            <div class="snake-container">
+                <div class="snake-stats">
+                    <div class="stat">
+                        <span class="stat-label">Score</span>
+                        <span class="stat-value" id="snakeScore">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">High Score</span>
+                        <span class="stat-value" id="snakeHighScore">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Speed</span>
+                        <span class="stat-value" id="snakeSpeed">1</span>
+                    </div>
+                </div>
+
+                <div class="snake-game-wrapper">
+                    <canvas id="snakeCanvas" width="400" height="400"></canvas>
+                    <div class="snake-overlay hidden" id="snakeOverlay">
+                        <div class="snake-overlay-content">
+                            <h2 id="snakeOverlayTitle">Snake Game</h2>
+                            <p id="snakeOverlayMessage">Press Start or Space to play</p>
+                            <button class="snake-start-btn" id="snakeStartBtn">Start Game</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="snake-controls">
+                    <button class="reset-btn" id="snakePauseBtn">Pause</button>
+                    <button class="reset-btn" id="snakeResetBtn">Reset</button>
+                </div>
+
+                <div class="snake-instructions">
+                    <p>🎮 Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move</p>
+                    <p>📱 On mobile, use the on-screen controls</p>
+                </div>
+
+                <!-- Mobile Controls -->
+                <div class="snake-mobile-controls" id="snakeMobileControls">
+                    <button class="mobile-btn" data-direction="up">▲</button>
+                    <div class="mobile-btn-row">
+                        <button class="mobile-btn" data-direction="left">◄</button>
+                        <button class="mobile-btn" data-direction="down">▼</button>
+                        <button class="mobile-btn" data-direction="right">►</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Game Hub. Made with ❤️ for fun!</p>
+    </footer>
+
+    <!-- Game Result Modal -->
+    <div class="modal-overlay" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">🎮</div>
+            <h2 class="modal-title" id="modalTitle">Game Over</h2>
+            <p class="modal-message" id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" id="modalPlayAgain">Play Again</button>
+                <button class="modal-btn secondary" id="modalClose">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="confirmIcon">⚠️</div>
+            <h2 class="modal-title" id="confirmTitle">Confirm</h2>
+            <p class="modal-message" id="confirmMessage">Are you sure?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" id="confirmYes">Yes</button>
+                <button class="modal-btn secondary" id="confirmNo">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="../sounds.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

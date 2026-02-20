@@ -5,305 +5,336 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Hub - Play Now</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8E%AE%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables & Theme */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --card: #ffffff;
+            --card-border: #e2e8f0;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --card: #1e293b;
+            --card-border: #334155;
+            --border: #334155;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text);
+            min-height: 100vh;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: var(--card);
+            border-bottom: 1px solid var(--card-border);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(15deg);
+            background: var(--card);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 48px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Game Cards Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .game-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .game-card-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .game-card h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .game-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .game-card .play-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 28px;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .game-card:hover .play-btn {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            background: var(--card);
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 16px;
+            }
+
+            .main-content {
+                padding: 32px 16px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
+    <!-- Navigation -->
     <nav class="navbar">
-        <div class="navbar-container">
-            <div class="navbar-brand">🎮 Game Hub</div>
-            <ul class="navbar-menu">
-                <li><a href="#" class="nav-link active" data-game="tictactoe">Tic-Tac-Toe</a></li>
-                <li><a href="#" class="nav-link" data-game="quiz">Quiz</a></li>
-                <li><a href="#" class="nav-link" data-game="memory">Memory</a></li>
-                <li><a href="#" class="nav-link" data-game="snake">Snake</a></li>
-            </ul>
-            <div class="theme-toggle">
-                <button class="theme-btn" id="themeBtn" title="Toggle dark/light mode">🌙</button>
-            </div>
-        </div>
+        <div class="nav-logo">🎮 Game Hub</div>
+        <button id="themeBtn" class="theme-toggle" aria-label="Toggle theme">🌙</button>
     </nav>
 
     <!-- Main Content -->
-    <main class="container">
-        <!-- Tic-Tac-Toe Game -->
-        <section class="game-section active" id="tictactoe-game">
-            <div class="game-header">
-                <h1>Tic-Tac-Toe</h1>
-            </div>
-
-            <div class="tictactoe-container">
-                <div class="game-info">
-                    <div class="score-board">
-                        <div class="score-item">
-                            <span class="score-label">Player X</span>
-                            <span class="score-value" id="playerXScore">0</span>
-                        </div>
-                        <div class="score-item">
-                            <span class="score-label">Draws</span>
-                            <span class="score-value" id="drawScore">0</span>
-                        </div>
-                        <div class="score-item">
-                            <span class="score-label">Player O</span>
-                            <span class="score-value" id="playerOScore">0</span>
-                        </div>
-                    </div>
-
-                    <div class="mode-selector">
-                        <label>Game Mode:</label>
-                        <select id="gameMode">
-                            <option value="pvp">Player vs Player</option>
-                            <option value="pvc">Player vs Computer</option>
-                        </select>
-                    </div>
-
-                    <div class="status-display" id="gameStatus">Game Start - Player X's Turn</div>
-                </div>
-
-                <div class="board" id="board">
-                    <div class="cell" data-index="0"></div>
-                    <div class="cell" data-index="1"></div>
-                    <div class="cell" data-index="2"></div>
-                    <div class="cell" data-index="3"></div>
-                    <div class="cell" data-index="4"></div>
-                    <div class="cell" data-index="5"></div>
-                    <div class="cell" data-index="6"></div>
-                    <div class="cell" data-index="7"></div>
-                    <div class="cell" data-index="8"></div>
-                </div>
-
-                <button class="reset-btn" id="resetTicTacToe">Reset Game</button>
-            </div>
+    <main class="main-content">
+        <section class="hero">
+            <h1>Welcome to Game Hub</h1>
         </section>
 
-        <!-- Quiz Game -->
-        <section class="game-section" id="quiz-game">
-            <div class="game-header">
-                <h1>Quiz Application</h1>
-            </div>
+        <div class="games-grid">
+            <a href="tictactoe/index.html" class="game-card">
+                <span class="game-card-icon">⭕</span>
+                <h2>Tic Tac Toe</h2>
+                <p>Classic X and O game. Play against a friend or challenge the computer in this timeless strategy game.</p>
+                <span class="play-btn">Play Now</span>
+            </a>
 
-            <div class="quiz-container">
-                <!-- Category Selection Screen -->
-                <div class="quiz-screen" id="quizCategoryScreen">
-                    <div class="category-selection">
-                        <h2>Select a Quiz Category</h2>
-                        <div class="category-buttons">
-                            <button class="category-btn" data-category="webdev">🌐 Web Development</button>
-                            <button class="category-btn" data-category="geography">🌍 Countries & Geography</button>
-                            <button class="category-btn" data-category="math">🔢 Mathematics</button>
-                        </div>
-                    </div>
-                </div>
+            <a href="quiz/index.html" class="game-card">
+                <span class="game-card-icon">🧠</span>
+                <h2>Quiz Game</h2>
+                <p>Test your knowledge! Answer questions from various categories including Web Dev, Geography, and Math.</p>
+                <span class="play-btn">Play Now</span>
+            </a>
 
-                <!-- Quiz Question Screen -->
-                <div class="quiz-screen hidden" id="quizQuestionScreen">
-                    <div class="quiz-header-bar">
-                        <div class="quiz-progress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progressFill"></div>
-                            </div>
-                            <div class="progress-text">
-                                <span id="currentQuestion">1</span> / <span id="totalQuestions">5</span>
-                            </div>
-                        </div>
-                        <div class="quiz-timer-score">
-                            <div class="timer-display" id="timerDisplay">
-                                <span class="timer-icon">⏱️</span>
-                                <span class="timer-value" id="timerValue">30</span>s
-                            </div>
-                            <div class="current-score-display" id="scoreDisplay">
-                                <span class="score-icon">⭐</span>
-                                <span class="score-value" id="currentScoreValue">0</span>
-                            </div>
-                        </div>
-                    </div>
+            <a href="memory/index.html" class="game-card">
+                <span class="game-card-icon">🎴</span>
+                <h2>Memory Cards</h2>
+                <p>Match pairs of cards to win! Train your memory with this fun and challenging card matching game.</p>
+                <span class="play-btn">Play Now</span>
+            </a>
 
-                    <div class="quiz-question" id="questionDisplay"></div>
+            <a href="snake/index.html" class="game-card">
+                <span class="game-card-icon">🐍</span>
+                <h2>Snake Game</h2>
+                <p>Guide the snake to eat food and grow longer. Don't hit the walls or yourself! How long can you survive?</p>
+                <span class="play-btn">Play Now</span>
+            </a>
 
-                    <div class="quiz-options" id="optionsContainer"></div>
-
-                    <div class="quiz-controls">
-                        <button class="btn btn-next" id="nextBtn" disabled>Next Question</button>
-                        <button class="btn btn-restart" id="quizRestart">Back to Categories</button>
-                    </div>
-                </div>
-
-                <!-- Quiz Results Screen -->
-                <div class="quiz-screen hidden" id="quizResultsScreen">
-                    <div class="results-container">
-                        <h2>Quiz Complete!</h2>
-                        <div class="score-circle">
-                            <div class="score-text">
-                                <span class="score-number" id="finalScore">0</span>
-                                <span class="score-total">/ 5</span>
-                            </div>
-                        </div>
-                        <div class="results-message" id="resultsMessage"></div>
-                        <button class="btn btn-restart" id="restartFromResults">Try Another Category</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Memory Game -->
-        <section class="game-section" id="memory-game">
-            <div class="game-header">
-                <h1>Memory Card Game</h1>
-            </div>
-
-            <div class="memory-container">
-                <!-- Difficulty Selection Screen -->
-                <div class="difficulty-selection" id="difficultySelection">
-                    <h3 class="difficulty-title">Choose Your Difficulty:</h3>
-                    <div class="difficulty-buttons">
-                        <button class="difficulty-btn" data-difficulty="easy">
-                            <span class="diff-emoji">🌱</span>
-                            <span class="diff-name">Easy</span>
-                            <span class="diff-info">12 cards • 90s</span>
-                        </button>
-                        <button class="difficulty-btn" data-difficulty="medium">
-                            <span class="diff-emoji">🌳</span>
-                            <span class="diff-name">Medium</span>
-                            <span class="diff-info">16 cards • 120s</span>
-                        </button>
-                        <button class="difficulty-btn" data-difficulty="hard">
-                            <span class="diff-emoji">🌲</span>
-                            <span class="diff-name">Hard</span>
-                            <span class="diff-info">24 cards • 150s</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Memory Game Screen -->
-                <div class="memory-game-screen hidden" id="memoryGameScreen">
-                    <div class="memory-stats">
-                        <div class="stat">
-                            <span class="stat-label">Moves</span>
-                            <span class="stat-value" id="moveCounter">0</span>
-                        </div>
-                        <div class="stat timer-stat">
-                            <span class="stat-label">Time Left</span>
-                            <span class="stat-value timer-value" id="timerCounter">90</span>s
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Score</span>
-                            <span class="stat-value" id="memoryScore">0</span>
-                        </div>
-                    </div>
-
-                    <div class="memory-grid" id="memoryGrid"></div>
-
-                    <div class="memory-controls">
-                        <button class="reset-btn" id="resetMemory">Change Difficulty</button>
-                        <button class="reset-btn" id="memoryMainMenu">Main Menu</button>
-                    </div>
-
-                    <div class="memory-message" id="memoryMessage"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Snake Game -->
-        <section class="game-section" id="snake-game">
-            <div class="game-header">
-                <h1>Snake Game</h1>
-            </div>
-
-            <div class="snake-container">
-                <div class="snake-stats">
-                    <div class="stat">
-                        <span class="stat-label">Score</span>
-                        <span class="stat-value" id="snakeScore">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">High Score</span>
-                        <span class="stat-value" id="snakeHighScore">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Speed</span>
-                        <span class="stat-value" id="snakeSpeed">1</span>
-                    </div>
-                </div>
-
-                <div class="snake-game-wrapper">
-                    <canvas id="snakeCanvas" width="400" height="400"></canvas>
-                    <div class="snake-overlay hidden" id="snakeOverlay">
-                        <div class="snake-overlay-content">
-                            <h2 id="snakeOverlayTitle">Snake Game</h2>
-                            <p id="snakeOverlayMessage">Press Start or Space to play</p>
-                            <button class="snake-start-btn" id="snakeStartBtn">Start Game</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="snake-controls">
-                    <button class="reset-btn" id="snakePauseBtn">Pause</button>
-                    <button class="reset-btn" id="snakeResetBtn">Reset</button>
-                </div>
-
-                <div class="snake-instructions">
-                    <p>🎮 Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move</p>
-                    <p>📱 On mobile, use the on-screen controls</p>
-                </div>
-
-                <!-- Mobile Controls -->
-                <div class="snake-mobile-controls" id="snakeMobileControls">
-                    <button class="mobile-btn" data-direction="up">▲</button>
-                    <div class="mobile-btn-row">
-                        <button class="mobile-btn" data-direction="left">◄</button>
-                        <button class="mobile-btn" data-direction="down">▼</button>
-                        <button class="mobile-btn" data-direction="right">►</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <a href="maze/index.html" class="game-card">
+                <span class="game-card-icon">🧩</span>
+                <h2>Memory Maze</h2>
+                <p>Navigate through the maze and solve color memory challenges to unlock gates and reach the exit!</p>
+                <span class="play-btn">Play Now</span>
+            </a>
+        </div>
     </main>
 
     <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2026 Game Hub. Created with ❤️ for fun and learning.</p>
+        <p>&copy; 2025 Game Hub. Made with ❤️ for fun!</p>
     </footer>
 
-    <!-- Game Result Modal -->
-    <div class="modal-overlay" id="gameModal">
-        <div class="modal-container">
-            <div class="modal-icon" id="modalIcon">🎉</div>
-            <h2 class="modal-title" id="modalTitle">You Win!</h2>
-            <p class="modal-message" id="modalMessage">Congratulations!</p>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-primary" id="modalPlayAgain">Play Again</button>
-                <button class="modal-btn modal-btn-secondary" id="modalClose">Close</button>
-            </div>
-        </div>
-    </div>
+    <script>
+        // Theme Management
+        const gameState = {
+            darkMode: localStorage.getItem('darkMode') === 'true'
+        };
 
-    <!-- Confirmation Modal -->
-    <div class="modal-overlay" id="confirmModal">
-        <div class="modal-container confirm-modal">
-            <div class="modal-icon" id="confirmIcon">⚠️</div>
-            <h2 class="modal-title" id="confirmTitle">Confirm Action</h2>
-            <p class="modal-message" id="confirmMessage">Are you sure?</p>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-danger" id="confirmYes">Yes</button>
-                <button class="modal-btn modal-btn-secondary" id="confirmNo">Cancel</button>
-            </div>
-        </div>
-    </div>
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            setupThemeButton();
+            setupGameCardSounds();
+        });
 
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer"></div>
+        function initTheme() {
+            if (gameState.darkMode) {
+                document.body.classList.add('dark-mode');
+                updateThemeBtn();
+            }
+        }
 
-    <!-- Sound Effects (Data URIs for minimal dependencies) -->
-    <audio id="moveSound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
-    </audio>
-    <audio id="winSound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
-    </audio>
-    <audio id="flipSound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
-    </audio>
+        function toggleTheme() {
+            gameState.darkMode = !gameState.darkMode;
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', gameState.darkMode);
+            updateThemeBtn();
+        }
 
-    <script src="script.js"></script>
+        function updateThemeBtn() {
+            const themeBtn = document.getElementById('themeBtn');
+            if (themeBtn) {
+                themeBtn.textContent = gameState.darkMode ? '☀️' : '🌙';
+            }
+        }
+
+        function setupThemeButton() {
+            const themeBtn = document.getElementById('themeBtn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', () => {
+                    playSound('click');
+                    toggleTheme();
+                });
+                updateThemeBtn();
+            }
+        }
+
+        function setupGameCardSounds() {
+            const gameCards = document.querySelectorAll('.game-card');
+            gameCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    playSound('click');
+                });
+            });
+        }
+    </script>
+    <script src="sounds.js"></script>
 </body>
 </html>

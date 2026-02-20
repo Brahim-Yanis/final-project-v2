@@ -1205,9 +1205,11 @@ body.dark-mode .theme-btn {
     backdrop-filter: blur(10px);
     border-radius: 20px;
     border: 2px solid var(--card-border);
-    perspective: 1000px;
+    /* Removed perspective: 1000px - was causing cards to shift position on transforms */
     box-shadow: var(--shadow-md);
     pointer-events: auto;
+    /* Ensure grid layout is stable and doesn't recalculate on child transforms */
+    contain: layout style;
 }
 
 .memory-grid.locked .memory-card {
@@ -1225,23 +1227,32 @@ body.dark-mode .theme-btn {
     justify-content: center;
     font-size: 32px;
     font-weight: 700;
-    transition: transform 0.6s ease, border-color var(--transition-fast), box-shadow var(--transition-fast);
-    position: relative;
-    transform-style: preserve-3d;
-    transform: rotateY(0deg);
+    /* Shorter transition for snappier feel, only transform properties */
+    transition: transform 0.3s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    /* Removed position: relative - not needed and can interfere with transforms */
+    /* Removed transform-style: preserve-3d - no 3D children to preserve */
+    /* Removed transform: rotateY(0deg) - was unnecessary default state */
     box-shadow: var(--shadow-sm);
     pointer-events: auto;
     user-select: none;
     -webkit-user-drag: none;
     touch-action: manipulation;
+    /* Ensure transforms don't affect grid layout flow */
+    transform-origin: center center;
+    will-change: transform;
+    /* Isolate stacking context so transforms don't cause visual reordering */
+    isolation: isolate;
 }
 
 .memory-card:hover:not(.matched):not(.flipped) {
     border-color: var(--ocean-primary);
     background: var(--bg-secondary);
-    transform: translateY(-4px) scale(1.02);
+    /* Reduced hover transform - subtle lift without affecting adjacent cards */
+    transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     pointer-events: auto;
+    /* Raise above siblings on hover for visual clarity */
+    z-index: 1;
 }
 
 .memory-card:focus-visible {
@@ -1254,8 +1265,13 @@ body.dark-mode .theme-btn {
     border-color: var(--ocean-primary);
     box-shadow: var(--shadow-md);
     pointer-events: auto;
-    transform: scale(1.05);
-    font-size: 48px;
+    /* Removed scale(1.05) - was causing cards to visually shift in tight grids */
+    /* Keep cards in place, only change appearance */
+    transform: none;
+    /* Slightly larger font for revealed emoji, but not extreme */
+    font-size: 36px;
+    /* Raise flipped cards above others */
+    z-index: 2;
 }
 
 .memory-card.matched {
@@ -1263,6 +1279,10 @@ body.dark-mode .theme-btn {
     opacity: 0.5;
     filter: grayscale(100%) brightness(1.1);
     pointer-events: none;
+    /* Reset transform to ensure matched cards don't shift */
+    transform: none;
+    /* Keep matched cards at base layer */
+    z-index: 0;
 }
 
 .memory-message {
@@ -1545,6 +1565,8 @@ body.dark-mode .footer {
         flex-direction: column;
     }
 
+    /* Note: grid-template-columns is set via inline JS for different difficulties.
+       Inline styles override this. This is just a fallback default. */
     .memory-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
@@ -1658,6 +1680,9 @@ body.dark-mode .footer {
         padding: 14px 20px;
     }
 
+    /* Note: grid-template-columns is set via inline JS for different difficulties.
+       Inline styles have higher specificity and will override this default.
+       This fallback is for when no game is active. */
     .memory-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -2155,5 +2180,637 @@ body.dark-mode .footer {
 
     .snake-stats .stat-value {
         font-size: 22px;
+    }
+}
+
+/* ============================================
+   Memory Maze Game Styles
+   ============================================ */
+
+/* Maze Theme Colors - Light Mode */
+:root {
+    --maze-primary: #8b5cf6;
+    --maze-secondary: #a78bfa;
+    --maze-bg: #f5f3ff;
+    --maze-wall: #374151;
+    --maze-path: var(--bg-secondary);
+    --maze-gate-locked: #ef4444;
+    --maze-gate-unlocked: #10b981;
+    --maze-player: #fbbf24;
+    
+    /* Color button colors */
+    --color-red: #ef4444;
+    --color-red-glow: rgba(239, 68, 68, 0.6);
+    --color-yellow: #eab308;
+    --color-yellow-glow: rgba(234, 179, 8, 0.6);
+    --color-green: #22c55e;
+    --color-green-glow: rgba(34, 197, 94, 0.6);
+    --color-blue: #3b82f6;
+    --color-blue-glow: rgba(59, 130, 246, 0.6);
+    --color-purple: #a855f7;
+    --color-purple-glow: rgba(168, 85, 247, 0.6);
+}
+
+/* Dark Mode overrides for Maze */
+body.dark-mode {
+    --maze-primary: #a78bfa;
+    --maze-secondary: #c4b5fd;
+    --maze-bg: #1e1b4b;
+    --maze-wall: #1f2937;
+    --maze-path: var(--bg-tertiary);
+    
+    --color-red: #f87171;
+    --color-red-glow: rgba(248, 113, 113, 0.7);
+    --color-yellow: #fde047;
+    --color-yellow-glow: rgba(253, 224, 71, 0.7);
+    --color-green: #4ade80;
+    --color-green-glow: rgba(74, 222, 128, 0.7);
+    --color-blue: #60a5fa;
+    --color-blue-glow: rgba(96, 165, 250, 0.7);
+    --color-purple: #c084fc;
+    --color-purple-glow: rgba(192, 132, 252, 0.7);
+}
+
+.maze-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.maze-stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.maze-stats .stat {
+    background: var(--card);
+    border: 2px solid var(--maze-primary);
+    border-radius: 16px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 100px;
+    box-shadow: var(--shadow-sm);
+}
+
+.maze-stats .stat-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.maze-stats .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--maze-primary);
+}
+
+/* Main Game Area - Side by Side layout */
+.maze-game-area {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Maze Grid */
+.maze-grid-wrapper {
+    position: relative;
+    background: var(--card);
+    border: 3px solid var(--maze-primary);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: var(--shadow-md);
+}
+
+.maze-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 32px);
+    grid-template-rows: repeat(11, 32px);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.maze-cell {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.maze-cell.wall {
+    background: var(--maze-wall);
+}
+
+.maze-cell.path {
+    background: var(--maze-path);
+}
+
+.maze-cell.gate {
+    background: var(--maze-gate-locked);
+    cursor: pointer;
+    position: relative;
+}
+
+.maze-cell.gate::after {
+    content: '🔒';
+    font-size: 16px;
+}
+
+.maze-cell.gate.unlocked {
+    background: var(--maze-gate-unlocked);
+}
+
+.maze-cell.gate.unlocked::after {
+    content: '🔓';
+}
+
+.maze-cell.gate.active {
+    animation: gatePulse 1s ease-in-out infinite;
+}
+
+@keyframes gatePulse {
+    0%, 100% { box-shadow: 0 0 8px var(--maze-gate-locked); }
+    50% { box-shadow: 0 0 20px var(--maze-gate-locked), 0 0 30px var(--maze-gate-locked); }
+}
+
+.maze-cell.start {
+    background: var(--success-light);
+}
+
+.maze-cell.start::after {
+    content: '🏁';
+    font-size: 16px;
+}
+
+.maze-cell.end {
+    background: var(--warning-light);
+}
+
+.maze-cell.end::after {
+    content: '🏆';
+    font-size: 16px;
+}
+
+/* Player */
+.maze-player {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transition: left 0.15s ease, top 0.15s ease;
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    pointer-events: none;
+}
+
+/* Color Memory Panel */
+.color-memory-panel {
+    background: var(--card);
+    border: 3px solid var(--maze-primary);
+    border-radius: 16px;
+    padding: 24px;
+    min-width: 280px;
+    max-width: 320px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.color-memory-panel.hidden {
+    display: none;
+}
+
+.memory-panel-header {
+    text-align: center;
+}
+
+.memory-panel-header h3 {
+    font-size: 20px;
+    color: var(--maze-primary);
+    margin-bottom: 8px;
+}
+
+.memory-panel-header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    min-height: 20px;
+}
+
+/* Color Buttons */
+.color-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    justify-items: center;
+}
+
+.color-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 4px solid var(--border);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    background: transparent;
+    padding: 0;
+}
+
+.color-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.color-btn:not(:disabled):hover {
+    transform: scale(1.08);
+}
+
+.color-btn:not(:disabled):active {
+    transform: scale(0.95);
+}
+
+.color-btn-inner {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transition: box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+/* Color Button Colors */
+.color-btn[data-color="red"] .color-btn-inner {
+    background: var(--color-red);
+}
+
+.color-btn[data-color="yellow"] .color-btn-inner {
+    background: var(--color-yellow);
+}
+
+.color-btn[data-color="green"] .color-btn-inner {
+    background: var(--color-green);
+}
+
+.color-btn[data-color="blue"] .color-btn-inner {
+    background: var(--color-blue);
+}
+
+.color-btn[data-color="purple"] .color-btn-inner {
+    background: var(--color-purple);
+}
+
+/* Lit up state (when playing sequence) */
+.color-btn.lit .color-btn-inner {
+    filter: brightness(1.4);
+}
+
+.color-btn[data-color="red"].lit {
+    box-shadow: 0 0 20px var(--color-red-glow), 0 0 40px var(--color-red-glow);
+    border-color: var(--color-red);
+}
+
+.color-btn[data-color="yellow"].lit {
+    box-shadow: 0 0 20px var(--color-yellow-glow), 0 0 40px var(--color-yellow-glow);
+    border-color: var(--color-yellow);
+}
+
+.color-btn[data-color="green"].lit {
+    box-shadow: 0 0 20px var(--color-green-glow), 0 0 40px var(--color-green-glow);
+    border-color: var(--color-green);
+}
+
+.color-btn[data-color="blue"].lit {
+    box-shadow: 0 0 20px var(--color-blue-glow), 0 0 40px var(--color-blue-glow);
+    border-color: var(--color-blue);
+}
+
+.color-btn[data-color="purple"].lit {
+    box-shadow: 0 0 20px var(--color-purple-glow), 0 0 40px var(--color-purple-glow);
+    border-color: var(--color-purple);
+}
+
+/* Correct/Wrong feedback */
+.color-btn.correct {
+    animation: correctPulse 0.3s ease;
+}
+
+.color-btn.wrong {
+    animation: wrongShake 0.4s ease;
+}
+
+@keyframes correctPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+@keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+
+/* Sequence Progress */
+.sequence-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.progress-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background-color 0.2s ease;
+}
+
+.progress-dot.completed {
+    background: var(--success);
+}
+
+.progress-dot.current {
+    background: var(--warning);
+    animation: dotPulse 0.8s ease-in-out infinite;
+}
+
+.progress-dot.wrong {
+    background: var(--error);
+}
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Start Sequence Button */
+.maze-btn {
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.start-sequence-btn {
+    background: linear-gradient(135deg, var(--maze-primary), var(--maze-secondary));
+    color: white;
+}
+
+.start-sequence-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.start-sequence-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Maze Controls */
+.maze-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.sound-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.sound-toggle input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Instructions */
+.maze-instructions {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    max-width: 500px;
+}
+
+.maze-instructions p {
+    margin: 6px 0;
+}
+
+/* Mobile Controls */
+.maze-mobile-controls {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.maze-mobile-btn {
+    border-color: var(--maze-primary);
+}
+
+.maze-mobile-btn:active {
+    background: var(--maze-primary);
+}
+
+/* Level Complete Overlay */
+.maze-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.maze-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.maze-overlay-content {
+    text-align: center;
+    color: white;
+    padding: 40px;
+}
+
+.maze-overlay-content h2 {
+    font-size: 36px;
+    margin-bottom: 16px;
+    color: var(--maze-primary);
+}
+
+.maze-overlay-content p {
+    font-size: 18px;
+    margin-bottom: 24px;
+    color: #ccc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .maze-game-area {
+        flex-direction: column;
+    }
+    
+    .maze-grid {
+        grid-template-columns: repeat(11, 28px);
+        grid-template-rows: repeat(11, 28px);
+    }
+    
+    .maze-cell {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .maze-player {
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+    }
+    
+    .color-memory-panel {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .maze-mobile-controls {
+        display: flex;
+    }
+    
+    .maze-instructions {
+        display: none;
+    }
+}
+
+@media (max-width: 400px) {
+    .maze-grid {
+        grid-template-columns: repeat(11, 24px);
+        grid-template-rows: repeat(11, 24px);
+    }
+    
+    .maze-cell {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+    
+    .maze-player {
+        width: 24px;
+        height: 24px;
+        font-size: 16px;
+    }
+    
+    .color-btn {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .maze-stats {
+        gap: 8px;
+    }
+    
+    .maze-stats .stat {
+        padding: 8px 14px;
+        min-width: 80px;
+    }
+    
+    .maze-stats .stat-value {
+        font-size: 18px;
+    }
+}
+
+/* ============================================
+   GLOBAL SOUND TOGGLE BUTTON
+   ============================================ */
+
+.sound-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: var(--card, #ffffff);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    cursor: pointer;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    z-index: 1000;
+}
+
+.sound-toggle-btn:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.sound-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.sound-toggle-btn.muted {
+    opacity: 0.7;
+}
+
+/* Dark mode styling */
+.dark-mode .sound-toggle-btn {
+    background: var(--card, #1e293b);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile positioning */
+@media (max-width: 768px) {
+    .sound-toggle-btn {
+        bottom: 15px;
+        right: 15px;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
     }
 }

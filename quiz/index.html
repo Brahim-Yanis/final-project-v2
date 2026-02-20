@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Game Hub</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%9D%93%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="../index.html" class="navbar-brand">🎮 Game Hub</a>
+            <ul class="navbar-menu">
+                <li><a href="../index.html" class="nav-link">🏠 Home</a></li>
+                <li><a href="../tictactoe/index.html" class="nav-link">Tic-Tac-Toe</a></li>
+                <li><a href="#" class="nav-link active">Quiz</a></li>
+                <li><a href="../memory/index.html" class="nav-link">Memory</a></li>
+                <li><a href="../snake/index.html" class="nav-link">Snake</a></li>
+                <li><a href="../maze/index.html" class="nav-link">Maze</a></li>
+            </ul>
+            <div class="theme-toggle">
+                <button class="theme-btn" id="themeBtn" title="Toggle dark/light mode">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <section class="game-section active" id="quiz-game">
+            <div class="game-header">
+                <h1>Quiz Application</h1>
+            </div>
+
+            <div class="quiz-container">
+                <!-- Category Selection Screen -->
+                <div class="quiz-screen" id="quizCategoryScreen">
+                    <div class="category-selection">
+                        <h2>Select a Quiz Category</h2>
+                        <div class="category-buttons">
+                            <button class="category-btn" data-category="webdev">🌐 Web Development</button>
+                            <button class="category-btn" data-category="geography">🌍 Countries & Geography</button>
+                            <button class="category-btn" data-category="math">🔢 Mathematics</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Question Screen -->
+                <div class="quiz-screen hidden" id="quizQuestionScreen">
+                    <div class="quiz-header-bar">
+                        <div class="quiz-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span id="currentQuestion">1</span> / <span id="totalQuestions">5</span>
+                            </div>
+                        </div>
+                        <div class="quiz-timer-score">
+                            <div class="timer-display" id="timerDisplay">
+                                <span class="timer-icon">⏱️</span>
+                                <span class="timer-value" id="timerValue">30</span>s
+                            </div>
+                            <div class="current-score-display" id="scoreDisplay">
+                                <span class="score-icon">⭐</span>
+                                <span class="score-value" id="currentScoreValue">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question" id="questionDisplay"></div>
+
+                    <div class="quiz-options" id="optionsContainer"></div>
+
+                    <div class="quiz-controls">
+                        <button class="btn btn-next" id="nextBtn" disabled>Next Question</button>
+                        <button class="btn btn-restart" id="quizRestart">Back to Categories</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results Screen -->
+                <div class="quiz-screen hidden" id="quizResultsScreen">
+                    <div class="results-container">
+                        <h2>Quiz Complete!</h2>
+                        <div class="score-circle">
+                            <div class="score-text">
+                                <span class="score-number" id="finalScore">0</span>
+                                <span class="score-total">/ 5</span>
+                            </div>
+                        </div>
+                        <div class="results-message" id="resultsMessage"></div>
+                        <button class="btn btn-restart" id="restartFromResults">Try Another Category</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Game Hub. Created with ❤️ for fun and learning.</p>
+    </footer>
+
+    <!-- Game Result Modal -->
+    <div class="modal-overlay" id="gameModal">
+        <div class="modal-container">
+            <div class="modal-icon" id="modalIcon">🎉</div>
+            <h2 class="modal-title" id="modalTitle">You Win!</h2>
+            <p class="modal-message" id="modalMessage">Congratulations!</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" id="modalPlayAgain">Play Again</button>
+                <button class="modal-btn modal-btn-secondary" id="modalClose">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-container confirm-modal">
+            <div class="modal-icon" id="confirmIcon">⚠️</div>
+            <h2 class="modal-title" id="confirmTitle">Confirm Action</h2>
+            <p class="modal-message" id="confirmMessage">Are you sure?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-danger" id="confirmYes">Yes</button>
+                <button class="modal-btn modal-btn-secondary" id="confirmNo">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="../sounds.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
